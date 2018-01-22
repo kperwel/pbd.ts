@@ -1,0 +1,30 @@
+{
+  "name": "position-based-dynamic",
+  "version": "0.0.1",
+  "description": "Position based dynamic",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --no-inline",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/three": "^0.84.21",
+    "awesome-typescript-loader": "^3.2.3",
+    "jsdom-quokka-plugin": "^1.0.6",
+    "prettier": "^1.10.2",
+    "ts-loader": "^2.3.7",
+    "typescript": "^2.5.2",
+    "webpack": "^3.5.6",
+    "webpack-dev-server": "^2.7.1"
+  },
+  "dependencies": {
+    "three": "^0.87.1"
+  },
+  "quokka": {
+    "plugins": [
+      "jsdom-quokka-plugin"
+    ]
+  }
+}
