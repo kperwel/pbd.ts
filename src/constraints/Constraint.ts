@@ -1,3 +1,4 @@
 export default interface Constraint {
-  solve: () => void;
+  stiffness: number;
+  solve: (dt?: number) => void;
 };
