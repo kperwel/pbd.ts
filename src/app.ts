@@ -1,3 +1,4 @@
+import { reducedLog } from './time/utils';
 import 'three/examples/js/controls/TrackballControls';
 import { Scene, PerspectiveCamera, WebGLRenderer, Vector3 } from 'three';
 import {
@@ -14,6 +15,8 @@ import { add, remove, UpdateFunctionType } from './time/loop';
 import MassPoint from './MassPoint';
 import DistanceConstraint from './constraints/DistanceConstraint';
 import Constraint from './constraints/Constraint';
+
+const GRAVITY_FORCE = new Vector3(0, -20, 0);
 
 const ITERATIONS = 10;
 
@@ -48,10 +51,10 @@ pointLight.position.set(10, 10, 10);
 scene.add(pointLight);
 
 // Meshes
-const geometry = new BoxGeometry(1, 1, 1);
+const geometry = new BoxGeometry(1, 1, 1, 2, 2, 2);
 const material = new MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 const cube = new Mesh(geometry, material);
-cube.position.set(0, 2, 0);
+cube.position.set(0, 0, 0);
 scene.add(cube);
 
 // Plane
@@ -73,11 +76,47 @@ const massPoints: Array<MassPoint> = geometry.vertices.map(
   v => new MassPoint(v),
 );
 
+// some debugging spheres on vertices
+const pointsMeshes = massPoints.map(
+  () => new Mesh(new SphereGeometry(0.05), material),
+);
+
+for (let pM of pointsMeshes) {
+  scene.add(pM);
+}
+
+for (let massPoint of massPoints) {
+  const sphere = new SphereGeometry(0.1);
+  const sphereMesh = new Mesh(sphere, material);
+
+  scene.add(sphereMesh);
+}
+
+// continue with constraints
+
 const constraints: Array<Constraint> = [];
 for (let { a, b, c } of geometry.faces) {
-  constraints.push(new DistanceConstraint(massPoints[a], massPoints[b]));
-  constraints.push(new DistanceConstraint(massPoints[b], massPoints[c]));
-  constraints.push(new DistanceConstraint(massPoints[c], massPoints[a]));
+  constraints.push(
+    new DistanceConstraint(
+      massPoints[a],
+      massPoints[b],
+      massPoints[b].position.distanceTo(massPoints[a].position),
+    ),
+  );
+  constraints.push(
+    new DistanceConstraint(
+      massPoints[b],
+      massPoints[c],
+      massPoints[b].position.distanceTo(massPoints[c].position),
+    ),
+  );
+  constraints.push(
+    new DistanceConstraint(
+      massPoints[c],
+      massPoints[a],
+      massPoints[c].position.distanceTo(massPoints[a].position),
+    ),
+  );
 }
 constraints.push(new DistanceConstraint(massPoints[0], mouse, 0, 1));
 massPoints.push(mouse);
@@ -87,7 +126,7 @@ const update = (dt: number, time: number) => {
   controls.update();
 
   for (let massPoint of massPoints) {
-    massPoint.velocity.add(new Vector3(0, -100 * dt, 0));
+    massPoint.velocity.add(GRAVITY_FORCE.clone().multiplyScalar(dt));
     massPoint.velocity.multiplyScalar(0.9);
     massPoint.nextPosition.addVectors(
       massPoint.position,
@@ -102,6 +141,10 @@ const update = (dt: number, time: number) => {
 
   for (let massPoint of massPoints) {
     massPoint.update();
+  }
+
+  for (let i in pointsMeshes) {
+    pointsMeshes[i].position.copy(massPoints[i].position);
   }
 
   geometry.verticesNeedUpdate = true;
