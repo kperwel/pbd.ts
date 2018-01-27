@@ -7,6 +7,9 @@ export default class DistanceConstraint implements Constraint {
   mp: Array<MassPoint>;
   distance: number;
   stiffness: number;
+  sub: Vector3;
+  dp1: Vector3;
+  dp2: Vector3;
 
   constructor(
     mp1: MassPoint,
@@ -14,24 +17,29 @@ export default class DistanceConstraint implements Constraint {
     distance: number = 1,
     stiffness: number = 0.5,
   ) {
+    this.sub = new Vector3();
+    this.dp1 = new Vector3();
+    this.dp2 = new Vector3();
     this.mp = [mp1, mp2];
     this.distance = distance;
     this.stiffness = stiffness;
   }
 
   solve() {
-    const sub = this.mp[0].nextPosition.clone().sub(this.mp[1].nextPosition);
-    sub.divideScalar(sub.length());
-    const dp1 = sub
-      .clone()
+    this.sub.subVectors(this.mp[0].nextPosition, this.mp[1].nextPosition);
+    const length = this.sub.length();
+    this.sub.divideScalar(length);
+    this.dp1
+      .copy(this.sub)
       .multiplyScalar(
         -this.mp[0].w /
           (this.mp[0].w + this.mp[1].w) *
           (this.mp[0].nextPosition.distanceTo(this.mp[1].nextPosition) -
             this.distance),
       );
-    const dp2 = sub
-      .clone()
+
+    this.dp2
+      .copy(this.sub)
       .multiplyScalar(
         this.mp[1].w /
           (this.mp[0].w + this.mp[1].w) *
@@ -39,7 +47,7 @@ export default class DistanceConstraint implements Constraint {
             this.distance),
       );
 
-    this.mp[0].nextPosition.add(dp1.multiplyScalar(this.stiffness));
-    this.mp[1].nextPosition.add(dp2.multiplyScalar(this.stiffness));
+    this.mp[0].nextPosition.add(this.dp1.multiplyScalar(this.stiffness));
+    this.mp[1].nextPosition.add(this.dp2.multiplyScalar(this.stiffness));
   }
 }

@@ -16,7 +16,7 @@ import MassPoint from './MassPoint';
 import DistanceConstraint from './constraints/DistanceConstraint';
 import Constraint from './constraints/Constraint';
 
-const GRAVITY_FORCE = new Vector3(0, -20, 0);
+const GRAVITY_FORCE = new Vector3(0, -10, 0);
 
 const ITERATIONS = 10;
 
@@ -51,7 +51,7 @@ pointLight.position.set(10, 10, 10);
 scene.add(pointLight);
 
 // Meshes
-const geometry = new BoxGeometry(1, 1, 1, 2, 2, 2);
+const geometry = new BoxGeometry(2, 2, 2, 5, 5, 5);
 const material = new MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 const cube = new Mesh(geometry, material);
 cube.position.set(0, 0, 0);
@@ -121,21 +121,30 @@ for (let { a, b, c } of geometry.faces) {
 constraints.push(new DistanceConstraint(massPoints[0], mouse, 0, 1));
 massPoints.push(mouse);
 
+let tempDeltaScaledVelocity = new Vector3();
+let tempDeltaScaledGravity = new Vector3();
+
+const constraintsLength = constraints.length;
 const update = (dt: number, time: number) => {
   mouse.position.copy(mousePosition);
   controls.update();
 
+  tempDeltaScaledGravity.copy(GRAVITY_FORCE).multiplyScalar(dt);
+
   for (let massPoint of massPoints) {
-    massPoint.velocity.add(GRAVITY_FORCE.clone().multiplyScalar(dt));
+    tempDeltaScaledVelocity.copy(massPoint.velocity);
+
+    massPoint.velocity.add(tempDeltaScaledGravity);
     massPoint.velocity.multiplyScalar(0.9);
     massPoint.nextPosition.addVectors(
       massPoint.position,
-      massPoint.velocity.clone().multiplyScalar(dt),
+      tempDeltaScaledVelocity,
     );
   }
+
   for (let i = 0; i < ITERATIONS; i++) {
-    for (let constraint of constraints) {
-      constraint.solve();
+    for (let i = 0; i < constraintsLength; i++) {
+      constraints[i].solve();
     }
   }
 
