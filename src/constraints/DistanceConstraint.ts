@@ -15,7 +15,7 @@ export default class DistanceConstraint implements Constraint {
     mp1: MassPoint,
     mp2: MassPoint,
     distance: number = 1,
-    stiffness: number = 0.5,
+    stiffness: number = 0.1,
   ) {
     this.sub = new Vector3();
     this.dp1 = new Vector3();
