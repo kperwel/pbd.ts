@@ -17,6 +17,11 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
 
+  devServer: {
+    host: '0.0.0.0',
+    open: true,
+  },
+
   // Source maps support ('inline-source-map' also works)
   devtool: 'source-map',
 

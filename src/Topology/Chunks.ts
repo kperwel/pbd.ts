@@ -1,10 +1,12 @@
-export class Chunks implements Iterable<any> {
+export default class Chunks implements Iterable<any> {
   array: Array<any>;
   chunkSize: number;
+
   constructor(array: Array<any>, chunkSize: number) {
     this.chunkSize = chunkSize;
     this.array = array;
   }
+
   [Symbol.iterator]() {
     let current = 0;
     let array = this.array;
