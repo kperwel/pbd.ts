@@ -1,7 +1,7 @@
-import { Vector3 } from 'three';
+import { Vector3 } from "three";
 
-import Constraint from './Constraint';
-import MassPoint from '../MassPoint';
+import Constraint from "./Constraint";
+import MassPoint from "../MassPoint";
 
 const calcn = (p1: Vector3, p2: Vector3): Vector3 =>
   new Vector3().crossVectors(p1, p2).normalize();
@@ -13,7 +13,7 @@ const calcq = (
   pl: Vector3,
   ni: Vector3,
   nj: Vector3,
-  d: number,
+  d: number
 ): Vector3 => {
   const pixni = new Vector3().crossVectors(pi, ni);
   const njxpj = new Vector3().crossVectors(nj, pj);
@@ -35,7 +35,7 @@ export default class BendingConstraint implements Constraint {
     mp3: MassPoint,
     mp4: MassPoint,
     angle: number = 1,
-    stiffness: number = 0.5,
+    stiffness: number = 0.5
   ) {
     this.sub = new Vector3();
     this.dp = [new Vector3(), new Vector3(), new Vector3(), new Vector3()];
@@ -65,17 +65,27 @@ export default class BendingConstraint implements Constraint {
       .multiplyScalar(-1)
       .sub(calcq(p4, p4, p2, p4, n1, n2, d));
 
-    q[0] = new Vector3().subVectors(q[1].multiplyScalar(-1), q[2]).sub(q[3]);
+    q[0] = q[1]
+      .clone()
+      .multiplyScalar(-1)
+      .sub(q[2])
+      .sub(q[3]);
 
     let wq2 = 0;
     for (let i = 0; i < 4; i++) {
       wq2 += w[i] * Math.pow(q[i].length(), 2);
     }
+    if (isNaN(wq2) || Math.abs(wq2) < 0.05) {
+      return;
+    }
+
     for (let i = 0; i < 4; i++) {
       this.dp[i] = q[i].multiplyScalar(
-        -w[i] * Math.sqrt(1 - Math.pow(d, 2)) * (Math.acos(d) - lambda) / wq2,
+        -w[i] * Math.sqrt(1 - Math.pow(d, 2)) * (Math.acos(d) - lambda) / wq2
       );
+    }
 
+    for (let i = 0; i < 4; i++) {
       this.mp[i].nextPosition.add(this.dp[i].multiplyScalar(this.stiffness));
     }
   }
