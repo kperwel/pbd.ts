@@ -1,6 +1,15 @@
-import { Vector3 } from 'three';
+import { Vector3 } from "three";
 const zero = new Vector3(0, 0, 0);
-export default class MassPoint {
+
+export interface IMassPoint {
+  w: number; // 1/mass
+  position: Vector3;
+  nextPosition: Vector3;
+  velocity: Vector3;
+  update(): void; // just copy nextPOsition to position
+}
+
+export default class MassPoint implements IMassPoint {
   w: number; // 1/mass
   position: Vector3;
   nextPosition: Vector3;
