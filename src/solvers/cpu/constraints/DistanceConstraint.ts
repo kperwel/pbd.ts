@@ -1,9 +1,9 @@
-import { Vector3 } from 'three';
+import { Vector3 } from "three";
 
-import Constraint from './Constraint';
-import MassPoint from '../MassPoint';
+import IConstraint from "./IConstraint";
+import MassPoint from "../../../MassPoint";
 
-export default class DistanceConstraint implements Constraint {
+export default class DistanceConstraint implements IConstraint {
   mp: Array<MassPoint>;
   distance: number;
   stiffness: number;
@@ -15,7 +15,7 @@ export default class DistanceConstraint implements Constraint {
     mp1: MassPoint,
     mp2: MassPoint,
     distance: number = 1,
-    stiffness: number = 0.1,
+    stiffness: number = 0.1
   ) {
     this.sub = new Vector3();
     this.dp1 = new Vector3();
@@ -35,7 +35,7 @@ export default class DistanceConstraint implements Constraint {
         -this.mp[0].w /
           (this.mp[0].w + this.mp[1].w) *
           (this.mp[0].nextPosition.distanceTo(this.mp[1].nextPosition) -
-            this.distance),
+            this.distance)
       );
 
     this.dp2
@@ -44,7 +44,7 @@ export default class DistanceConstraint implements Constraint {
         this.mp[1].w /
           (this.mp[0].w + this.mp[1].w) *
           (this.mp[0].nextPosition.distanceTo(this.mp[1].nextPosition) -
-            this.distance),
+            this.distance)
       );
 
     this.mp[0].nextPosition.add(this.dp1.multiplyScalar(this.stiffness));

@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 
-import Constraint from "./Constraint";
-import MassPoint from "../MassPoint";
+import IConstraint from "./IConstraint";
+import MassPoint from "../../../MassPoint";
 
 const calcn = (p1: Vector3, p2: Vector3): Vector3 =>
   new Vector3().crossVectors(p1, p2).normalize();
@@ -21,7 +21,7 @@ const calcq = (
   return pixni.add(njxpj.multiplyScalar(d)).divideScalar(pkxpl.length());
 };
 
-export default class BendingConstraint implements Constraint {
+export default class BendingConstraint implements IConstraint {
   mp: Array<MassPoint>;
   angle: number;
   stiffness: number;
@@ -75,7 +75,7 @@ export default class BendingConstraint implements Constraint {
     for (let i = 0; i < 4; i++) {
       wq2 += w[i] * Math.pow(q[i].length(), 2);
     }
-    if (isNaN(wq2) || Math.abs(wq2) < 0.05) {
+    if (isNaN(wq2) || Math.abs(wq2) < 0.0000001) {
       return;
     }
 
