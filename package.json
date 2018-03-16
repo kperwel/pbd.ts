@@ -11,6 +11,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/three": "^0.84.21",
+    "assemblyscript": "AssemblyScript/assemblyscript",
     "awesome-typescript-loader": "^3.2.3",
     "jsdom-quokka-plugin": "^1.0.6",
     "prettier": "^1.10.2",
@@ -20,6 +21,7 @@
     "webpack-dev-server": "^2.7.1"
   },
   "dependencies": {
+    "gpu.js": "^1.2.0",
     "three": "^0.87.1"
   },
   "quokka": {

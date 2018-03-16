@@ -1,7 +1,9 @@
 import { Vector3, Face3 } from "three";
 
-const hashPoint = (point: Vector3): string =>
-  `${point.x}-${point.y}-${point.z}`;
+const hashPoint = (point: Vector3, cellSize: number): string =>
+  `${Math.trunc(point.x * 100 / cellSize)}-${Math.trunc(
+    point.y * 100 / cellSize
+  )}-${Math.trunc(point.z * 100 / cellSize)}`;
 
 interface IStringTMap<T> {
   [key: string]: T;
@@ -16,7 +18,7 @@ const pushOrInit = (ob: IStringFaceArrayMap, key: string, item: Face3) => {
   }
 };
 
-class SpatialHashMap {
+export default class SpatialHashMap {
   map: IStringFaceArrayMap = {};
   cellSize: number;
 
@@ -24,8 +26,8 @@ class SpatialHashMap {
     this.cellSize = cellSize;
   }
   addFace(face: Face3, vertices: Array<Vector3>) {
-    pushOrInit(this.map, hashPoint(vertices[face.a]), face);
-    pushOrInit(this.map, hashPoint(vertices[face.b]), face);
-    pushOrInit(this.map, hashPoint(vertices[face.c]), face);
+    pushOrInit(this.map, hashPoint(vertices[face.a], this.cellSize), face);
+    pushOrInit(this.map, hashPoint(vertices[face.b], this.cellSize), face);
+    pushOrInit(this.map, hashPoint(vertices[face.c], this.cellSize), face);
   }
 }
