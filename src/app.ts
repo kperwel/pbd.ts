@@ -33,6 +33,7 @@ import BendingConstraint from "./solvers/cpu/constraints/BendingConstraint";
 import { version } from "punycode";
 import CollisionConstraint from "./solvers/cpu/constraints/CollisionConstraint";
 import CpuSolver from "./solvers/cpu";
+import GpuSolver from "./solvers/gpu";
 
 const GRAVITY_FORCE = new Vector3(0, -3, 0);
 
@@ -131,6 +132,9 @@ let tempDeltaScaledVelocity = new Vector3();
 let tempDeltaScaledGravity = new Vector3();
 
 const solver = new CpuSolver(geometry, SIZE);
+const gpuSolver = new GpuSolver(geometry, SIZE);
+gpuSolver.setupConstraints();
+
 solver.setFloor(new Vector3(0, -4.9, 0));
 
 const update = (dt: number, time: number) => {
