@@ -12,20 +12,14 @@ module.exports = {
     publicPath: "/assets/",
     filename: "./bundle.js"
   },
-  // Currently we need to add '.ts' to the resolve.extensions array.
   resolve: {
     extensions: ['.ts', '.js'],
   },
-
   devServer: {
     host: '0.0.0.0',
     open: true,
   },
-
-  // Source maps support ('inline-source-map' also works)
   devtool: 'source-map',
-
-  // Add the loader for .ts files.
   module: {
     loaders: [
       {

@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 
 import IConstraint from "./IConstraint";
 import MassPoint from "../../../MassPoint";
+import { Prealocator } from "../../Prealocator";
 
 export default class DistanceConstraint implements IConstraint {
   mp: Array<MassPoint>;
@@ -17,9 +18,9 @@ export default class DistanceConstraint implements IConstraint {
     distance: number = 1,
     stiffness: number = 0.1
   ) {
-    this.sub = new Vector3();
-    this.dp1 = new Vector3();
-    this.dp2 = new Vector3();
+    this.sub = Prealocator.getVector3();
+    this.dp1 = Prealocator.getVector3();
+    this.dp2 = Prealocator.getVector3();
     this.mp = [mp1, mp2];
     this.distance = distance;
     this.stiffness = stiffness;

@@ -2,9 +2,15 @@ import { Vector3 } from "three";
 
 import IConstraint from "./IConstraint";
 import MassPoint from "../../../MassPoint";
+import { Prealocator } from "../../Prealocator";
 
 const calcn = (p1: Vector3, p2: Vector3): Vector3 =>
-  new Vector3().crossVectors(p1, p2).normalize();
+  Prealocator.getVector3().crossVectors(p1, p2).normalize();
+
+
+let pixni = Prealocator.getVector3();
+let njxpj = Prealocator.getVector3();
+let pkxpl = Prealocator.getVector3();
 
 const calcq = (
   pi: Vector3,
@@ -15,12 +21,14 @@ const calcq = (
   nj: Vector3,
   d: number
 ): Vector3 => {
-  const pixni = new Vector3().crossVectors(pi, ni);
-  const njxpj = new Vector3().crossVectors(nj, pj);
-  const pkxpl = new Vector3().crossVectors(pk, pl);
-  return pixni.add(njxpj.multiplyScalar(d)).divideScalar(pkxpl.length());
+  pixni.crossVectors(pi, ni);
+  njxpj.crossVectors(nj, pj);
+  pkxpl.crossVectors(pk, pl);
+
+  return Prealocator.getVector3().addVectors(pixni, njxpj.multiplyScalar(d)).divideScalar(pkxpl.length());
 };
 
+let wq2 = 0;
 export default class BendingConstraint implements IConstraint {
   mp: Array<MassPoint>;
   angle: number;
@@ -37,8 +45,8 @@ export default class BendingConstraint implements IConstraint {
     angle: number = 1,
     stiffness: number = 0.5
   ) {
-    this.sub = new Vector3();
-    this.dp = [new Vector3(), new Vector3(), new Vector3(), new Vector3()];
+    this.sub = Prealocator.getVector3();
+    this.dp = [Prealocator.getVector3(), Prealocator.getVector3(), Prealocator.getVector3(), Prealocator.getVector3()];
 
     this.mp = [mp1, mp2, mp3, mp4];
 
@@ -49,8 +57,6 @@ export default class BendingConstraint implements IConstraint {
   solve() {
     const lambda = this.angle;
     const q = [];
-    const w = this.mp.map(({ w }) => w);
-    const { nextPosition: p1 } = this.mp[0];
     const { nextPosition: p2 } = this.mp[1];
     const { nextPosition: p3 } = this.mp[2];
     const { nextPosition: p4 } = this.mp[3];
@@ -71,17 +77,17 @@ export default class BendingConstraint implements IConstraint {
       .sub(q[2])
       .sub(q[3]);
 
-    let wq2 = 0;
+    wq2 = 0;
     for (let i = 0; i < 4; i++) {
-      wq2 += w[i] * Math.pow(q[i].length(), 2);
+      wq2 += this.mp[i].w * Math.pow(q[i].length(), 2);
     }
-    if (isNaN(wq2) || Math.abs(wq2) < 0.0000001) {
-      return;
-    }
+    // if (isNaN(wq2) || Math.abs(wq2) < 0.0000001) {
+    //   return;
+    // }
 
     for (let i = 0; i < 4; i++) {
       this.dp[i] = q[i].multiplyScalar(
-        -w[i] * Math.sqrt(1 - Math.pow(d, 2)) * (Math.acos(d) - lambda) / wq2
+        -this.mp[i].w * Math.sqrt(1 - Math.pow(d, 2)) * (Math.acos(d) - lambda) / wq2
       );
     }
 

@@ -1,19 +1,21 @@
 import MassPoint, { IMassPoint } from "./../../MassPoint";
 import ISolver from "../ISolver";
-import { Mesh, PlaneGeometry, MaskPass, Vector3 } from "three";
+import { PlaneGeometry, Vector3 } from "three";
 import IConstraint from "./constraints/IConstraint";
 import DistanceConstraint from "./constraints/DistanceConstraint";
 import BendingConstraint from "./constraints/BendingConstraint";
 import CollisionConstraint from "./constraints/CollisionConstraint";
+import { Prealocator } from "../Prealocator";
 
-const ITERATIONS = 30;
+const ITERATIONS = 10;
 
 const calcIterationalStiffness = (stiffness: number) =>
   1 - Math.pow(1 - stiffness, 1 / ITERATIONS);
-
 class Cpu implements ISolver {
   constraints: Array<IConstraint> = [];
   onceConstraints: Array<IConstraint> = [];
+  hook: MassPoint;
+  hooks: Array<[IMassPoint, number]>
 
   massPoints: Array<IMassPoint> = [];
   geometry: PlaneGeometry;
@@ -27,8 +29,13 @@ class Cpu implements ISolver {
     this.width = width;
     this.height = height;
     this.geometry = geometry;
+    this.hooks = [];
 
     this.setMassPoints(this.geometry.vertices.map(v => new MassPoint(v)));
+  }
+
+  setHook(hook: IMassPoint, point: number = 9) {
+    this.hooks.push([hook, point]);
   }
 
   setMassPoints(massPoints: Array<IMassPoint>) {
@@ -60,6 +67,8 @@ class Cpu implements ISolver {
         )
       );
     }
+    const bending = this.constraints.length;
+    console.log('Bending', bending)
 
     // continue with constraintsSetting position constraints
     for (let { a, b, c } of this.geometry.faces) {
@@ -88,6 +97,22 @@ class Cpu implements ISolver {
         )
       );
     }
+    const distance = this.constraints.length - bending;
+    console.log('Distance', distance);
+
+    for (let hook of this.hooks) {
+      this.constraints.push(
+        new DistanceConstraint(
+          this.massPoints[hook[1]],
+          hook[0],
+          0,
+          calcIterationalStiffness(1)
+        )
+      );
+    }
+
+    console.log('hooks', this.constraints.length - (distance + bending));
+    
   }
 
   checkDynamicConstraints() {
@@ -96,12 +121,12 @@ class Cpu implements ISolver {
         this.onceConstraints.push(
           new CollisionConstraint(
             this.massPoints[i],
-            new Vector3(
+            Prealocator.getVector3().set(
               this.massPoints[i].nextPosition.x,
               this.floor.y,
               this.massPoints[i].nextPosition.z
             ),
-            new Vector3(0, 1, 0),
+            Prealocator.getVector3().set(0, 1, 0),
             1
           )
         );

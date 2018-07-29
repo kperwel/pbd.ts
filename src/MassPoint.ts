@@ -1,12 +1,14 @@
 import { Vector3 } from "three";
-const zero = new Vector3(0, 0, 0);
+import { Prealocator } from "./solvers/Prealocator";
+
+
 
 export interface IMassPoint {
   w: number; // 1/mass
   position: Vector3;
   nextPosition: Vector3;
   velocity: Vector3;
-  update(): void; // just copy nextPOsition to position
+  update(): void;
 }
 
 export default class MassPoint implements IMassPoint {
@@ -18,7 +20,7 @@ export default class MassPoint implements IMassPoint {
   constructor(position: Vector3) {
     this.position = position;
     this.nextPosition = position.clone();
-    this.velocity = new Vector3(0, 0, 0);
+    this.velocity = Prealocator.getVector3();
     this.w = 1;
   }
 

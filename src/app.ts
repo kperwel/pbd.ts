@@ -6,17 +6,13 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
   Vector3,
-  TextGeometry,
   CubeGeometry,
   BackSide,
-  Plane,
-  Color,
   DoubleSide,
   MeshLambertMaterial,
   AmbientLight
 } from "three";
 import {
-  BoxGeometry,
   PlaneGeometry,
   SphereGeometry,
   Mesh,
@@ -25,25 +21,14 @@ import {
 } from "three";
 import { PointLight } from "three";
 
-import { add, remove, UpdateFunctionType } from "./time/loop";
+import { add, UpdateFunctionType } from "./time/loop";
 import MassPoint from "./MassPoint";
-import DistanceConstraint from "./solvers/cpu/constraints/DistanceConstraint";
-import IConstraint from "./solvers/cpu/constraints/IConstraint";
-import BendingConstraint from "./solvers/cpu/constraints/BendingConstraint";
-import { version } from "punycode";
-import CollisionConstraint from "./solvers/cpu/constraints/CollisionConstraint";
 import CpuSolver from "./solvers/cpu";
+import { Prealocator } from "./solvers/Prealocator";
 
 const GRAVITY_FORCE = new Vector3(0, -3, 0);
 
-const SIZE: number = 20;
-
-const ITERATIONS = 30;
-
-const log = reducedLog(100);
-
-const calcIterationalStiffness = (stiffness: number) =>
-  1 - Math.pow(1 - stiffness, 1 / ITERATIONS);
+const SIZE: number = 39;
 
 const scene = new Scene();
 const camera = new PerspectiveCamera(
@@ -68,8 +53,8 @@ scene.add(skyBox);
 
 const quickDraw = new QuickDraw(scene);
 
-const floor = quickDraw.drawPlane(new Vector3(0, -5, 0), 0xffff66, false);
-floor.rotateX(-Math.PI / 2);
+// const floor = quickDraw.drawPlane(new Vector3(0, -5, 0), 0xffff66, false);
+// floor.rotateX(-Math.PI / 2);
 
 // Trackball camera setting
 const controls = new TrackballControls(camera);
@@ -109,8 +94,12 @@ const cloth = new Mesh(geometry, material);
 cloth.position.set(0, 0, 0);
 scene.add(cloth);
 
-const hookMesh = quickDraw.drawSphere(new Vector3(), 0x660000);
-const hook = new MassPoint(hookMesh.position);
+// const hookMesh = quickDraw.drawSphere(new Vector3(), 0x660000);
+const hook = new MassPoint(Prealocator.getVector3());
+const hook2 = new MassPoint(Prealocator.getVector3());
+const hook3 = new MassPoint(Prealocator.getVector3());
+const hook4 = new MassPoint(Prealocator.getVector3());
+
 
 // some debugging spheres on vertices
 const pointsMeshes = geometry.vertices.map(
@@ -126,21 +115,44 @@ const pointsMeshes = geometry.vertices.map(
 for (let pM of pointsMeshes) {
   scene.add(pM);
 }
+// scene.add(hookMesh);
 
-let tempDeltaScaledVelocity = new Vector3();
-let tempDeltaScaledGravity = new Vector3();
+let tempDeltaScaledVelocity = Prealocator.getVector3();
+let tempDeltaScaledGravity = Prealocator.getVector3();
 
 const solver = new CpuSolver(geometry, SIZE);
-solver.setFloor(new Vector3(0, -4.9, 0));
+// solver.setFloor(new Vector3(0, -4.9, 0));
+solver.setHook(hook, 0);
+solver.setHook(hook2, SIZE - 1);
+solver.setHook(hook3, SIZE * SIZE - SIZE);
+solver.setHook(hook4, SIZE * SIZE - 2);
+solver.setupConstraints();
 
 const update = (dt: number, time: number) => {
-  hook.position.set(
-    200 * Math.sin(time / 500),
-    10 + SIZE * 2 + 50 * Math.cos(time / 500),
-    20 * Math.cos(time / 500)
+  controls.update();
+
+
+  hook.nextPosition.set(
+    10,
+    5,
+    10
   );
 
-  controls.update();
+  hook2.nextPosition.set(
+    10,
+    5,
+    -10
+  );
+  hook3.nextPosition.set(
+    -10,
+    5,
+    10
+  );
+  hook4.nextPosition.set(
+    -10,
+    5,
+    -10
+  );
 
   tempDeltaScaledGravity.copy(GRAVITY_FORCE).multiplyScalar(dt);
 
@@ -160,10 +172,12 @@ const update = (dt: number, time: number) => {
   for (let massPoint of solver.massPoints) {
     massPoint.update();
   }
+  // solver.hook.update();
 
   for (let i in pointsMeshes) {
     pointsMeshes[i].position.copy(solver.massPoints[i].position);
   }
+  // hookMesh.position.copy(hook.position);
 
   geometry.normalsNeedUpdate = true;
   geometry.verticesNeedUpdate = true;

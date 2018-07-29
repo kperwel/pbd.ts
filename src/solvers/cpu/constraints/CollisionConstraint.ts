@@ -2,6 +2,7 @@ import { Vector3, Mesh } from "three";
 
 import IConstraint from "./IConstraint";
 import MassPoint from "../../../MassPoint";
+import { Prealocator } from "../../Prealocator";
 
 export default class CollisionConstraint implements IConstraint {
   mp: MassPoint;
@@ -22,7 +23,7 @@ export default class CollisionConstraint implements IConstraint {
   }
 
   solve() {
-    const response = new Vector3();
+    const response = Prealocator.getVector3();
     response
       .subVectors(this.collisionPoint, this.mp.nextPosition)
       .multiply(this.direction);
