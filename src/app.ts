@@ -53,8 +53,8 @@ scene.add(skyBox);
 
 const quickDraw = new QuickDraw(scene);
 
-// const floor = quickDraw.drawPlane(new Vector3(0, -5, 0), 0xffff66, false);
-// floor.rotateX(-Math.PI / 2);
+const floor = quickDraw.drawPlane(new Vector3(0, -5, 0), 0xffff66, false);
+floor.rotateX(-Math.PI / 2);
 
 // Trackball camera setting
 const controls = new TrackballControls(camera);
@@ -73,12 +73,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Light settings
-var light = new AmbientLight(0x000066, 1); // soft white light
+var light = new AmbientLight(0x666666, 1.2); // soft white light
 scene.add(light);
 
-const pointLight = new PointLight(0xffffff, 1, 100);
-pointLight.position.set(10, 10, 10);
-scene.add(pointLight);
+// const pointLight = new PointLight(0xffffff, 1, 100);
+// pointLight.position.set(10, 10, 10);
+// scene.add(pointLight);
 
 // Meshes
 const geometry = new PlaneGeometry(6, 6, SIZE - 1, SIZE - 1);
@@ -121,11 +121,11 @@ let tempDeltaScaledVelocity = Prealocator.getVector3();
 let tempDeltaScaledGravity = Prealocator.getVector3();
 
 const solver = new CpuSolver(geometry, SIZE);
-// solver.setFloor(new Vector3(0, -4.9, 0));
+solver.setFloor(new Vector3(0, -4.9, 0));
 solver.setHook(hook, 0);
-solver.setHook(hook2, SIZE - 1);
-solver.setHook(hook3, SIZE * SIZE - SIZE);
-solver.setHook(hook4, SIZE * SIZE - 2);
+// solver.setHook(hook2, SIZE - 1);
+// solver.setHook(hook3, SIZE * SIZE - SIZE);
+// solver.setHook(hook4, SIZE * SIZE - 2);
 solver.setupConstraints();
 
 const update = (dt: number, time: number) => {
@@ -133,26 +133,26 @@ const update = (dt: number, time: number) => {
 
 
   hook.nextPosition.set(
-    10,
-    5,
-    10
+    Math.cos(time / 500) * -50 + 0,
+    Math.sin(time / 1000) * -20 + 30,
+    Math.sin(time / 500) * -50 + 0,
   );
 
-  hook2.nextPosition.set(
-    10,
-    5,
-    -10
-  );
-  hook3.nextPosition.set(
-    -10,
-    5,
-    10
-  );
-  hook4.nextPosition.set(
-    -10,
-    5,
-    -10
-  );
+  // hook2.nextPosition.set(
+  //   Math.cos(time / 1000) * -20,
+  //   40,
+  //   Math.sin(time / 1000) * 20,
+  // );
+  // hook3.nextPosition.set(
+  //   -10,
+  //   15,
+  //   10
+  // );
+  // hook4.nextPosition.set(
+  //   -10,
+  //   15,
+  //   -10
+  // );
 
   tempDeltaScaledGravity.copy(GRAVITY_FORCE).multiplyScalar(dt);
 

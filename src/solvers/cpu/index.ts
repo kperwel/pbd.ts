@@ -7,7 +7,7 @@ import BendingConstraint from "./constraints/BendingConstraint";
 import CollisionConstraint from "./constraints/CollisionConstraint";
 import { Prealocator } from "../Prealocator";
 
-const ITERATIONS = 10;
+const ITERATIONS = 15;
 
 const calcIterationalStiffness = (stiffness: number) =>
   1 - Math.pow(1 - stiffness, 1 / ITERATIONS);
@@ -63,7 +63,7 @@ class Cpu implements ISolver {
           this.massPoints[i],
           this.massPoints[i + this.width + 1],
           0,
-          calcIterationalStiffness(0.4)
+          calcIterationalStiffness(0.3)
         )
       );
     }
@@ -121,12 +121,12 @@ class Cpu implements ISolver {
         this.onceConstraints.push(
           new CollisionConstraint(
             this.massPoints[i],
-            Prealocator.getVector3().set(
+            new Vector3().set(
               this.massPoints[i].nextPosition.x,
               this.floor.y,
               this.massPoints[i].nextPosition.z
             ),
-            Prealocator.getVector3().set(0, 1, 0),
+            new Vector3(0, 1, 0),
             1
           )
         );

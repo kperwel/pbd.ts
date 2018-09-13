@@ -19,7 +19,7 @@ export class QuickDraw {
     this.scene = scene;
     this.materials = new Map();
     this.sphereGeometry = new SphereGeometry(0.2);
-    this.planeGeometry = new PlaneGeometry(10, 10);
+    this.planeGeometry = new PlaneGeometry(20, 20);
   }
 
   getMaterial(color: number = 0xff0000, wireframe = false) {
